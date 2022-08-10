@@ -1,1 +1,2 @@
-
+V4L2 编程 QT控件显示视频 格式采用YUYV格式
+YUYV格式不同于MJPEG格式，无法直接显示在QT的label控件或者paintEvent显示,需要转RGB格式用于显示
