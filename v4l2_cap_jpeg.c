@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Usage: %s <video_dev>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
+    struct v4l2_capability vcap = {0};
     // 打开设备
     int fd;
     fd = open(argv[1], O_RDWR);
