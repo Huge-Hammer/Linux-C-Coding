@@ -1,3 +1,10 @@
+/***************************************************************
+ 文件名 : v4l2_cap_jpeg.c
+ 作者 : Hammer
+ 版本 : V1.0
+ 描述 : V4L2摄像头采集JPEG图像
+ 日志 : 初版 V1.0 2022/06/01 Hammer创建
+ ***************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -10,6 +17,9 @@
 #include <sys/mman.h>
 #include <linux/videodev2.h>
 #include <linux/fb.h>
+
+#define pixel_width  640
+#define pixel_height 480
 
 int main(int argc, char *argv[]){
     if (2 != argc) {
@@ -62,8 +72,8 @@ int main(int argc, char *argv[]){
     frmival.index = 0;
     frmival.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     frmival.pixel_format = V4L2_PIX_FMT_MJPEG;
-    frmival.width = 640;
-    frmival.height = 480;
+    frmival.width = pixel_width;
+    frmival.height = pixel_height;
     while(ioctl(fd,VIDIOC_ENUM_FRAMEINTERVALS,&frmival) == 0){
         printf("frame_interval under frame_size <%d*%d> support %dfps\n",frmival.width,frmival.height,frmival.discrete.denominator / frmival.discrete.numerator);
         frmival.index++;
@@ -72,8 +82,8 @@ int main(int argc, char *argv[]){
     // 设置采集格式
     struct v4l2_format vfmt;
     vfmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    vfmt.fmt.pix.width = 640;
-    vfmt.fmt.pix.height = 480;
+    vfmt.fmt.pix.width = pixel_width;
+    vfmt.fmt.pix.height = pixel_height;
     vfmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
     if(ioctl(fd,VIDIOC_S_FMT,&vfmt) < 0){
         perror("设置格式失败\n");
@@ -84,7 +94,7 @@ int main(int argc, char *argv[]){
         perror("获取设置格式失败\n");
         return -1;
     }
-    else if(vfmt.fmt.pix.width == 640 && vfmt.fmt.pix.height == 480 && vfmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG){
+    else if(vfmt.fmt.pix.width == pixel_width && vfmt.fmt.pix.height == pixel_height && vfmt.fmt.pix.pixelformat == V4L2_PIX_FMT_MJPEG){
         printf("设置格式生效,实际分辨率大小<%d * %d>,图像格式:Motion-JPEG\n",vfmt.fmt.pix.width,vfmt.fmt.pix.height);
     }
     else{
@@ -158,7 +168,7 @@ int main(int argc, char *argv[]){
 
     // 保存这一帧，格式为jpg
     FILE *file = fopen("v4l2_cap.jpg","w+");
-    fwrite(frm_base[readbuffer.index],readbuffer.length,1,file);
+    fwrite(frm_base[readbuffer.index],buf.length,1,file);
     fclose(file);
 
     // 再次入队
